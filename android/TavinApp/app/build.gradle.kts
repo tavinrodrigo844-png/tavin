@@ -1,53 +1,62 @@
-plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-}
+# Tavin
 
-android {
-    namespace = "com.tavin.app"
-    compileSdk = 34
+Aplicativo para compartilhar a tela de um celular para outro em rede local, com consentimento explícito dos dois aparelhos.
 
-    defaultConfig {
-        applicationId = "com.tavin.app"
-        minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+## Como funciona
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+- Celular A: usa o modo `sender`
+- Celular B: usa o modo `receiver`
+- Servidor: fica no mesmo Wi‑Fi e repassa os frames
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
+## Requisitos
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
+- Android Studio
+- SDK Android 34
+- Node.js 18+
+- Dois celulares na mesma rede Wi‑Fi
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+## Iniciar o servidor
 
-    buildFeatures {
-        viewBinding = true
-    }
-}
+```bash
+cd server
+npm install
+node server.js
+```
 
-dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-}
+O servidor fica em:
+
+```text
+ws://SEU_IP_LOCAL:8080
+```
+
+Exemplo:
+
+```text
+ws://192.168.0.10:8080
+```
+
+## Rodar no Android
+
+1. Abra a pasta `android/TavinApp` no Android Studio.
+2. Sincronize o projeto.
+3. Conecte um celular para depuração.
+4. No app:
+   - escolha `Sender` no celular 1
+   - escolha `Receiver` no celular 2
+   - informe o IP do servidor
+   - pressione `Conectar`
+   - no celular 1, pressione `Iniciar`
+   - aceite a permissão de gravação de tela
+
+## Observação legal
+
+Este projeto é para uso legítimo, local e com consentimento explícito dos dois dispositivos. Não use para monitoramento não autorizado.
+
+## Futuras melhorias
+
+- Login por código de compartilhamento
+- Gravação em MP4 local
+- Suporte a múltiplos receivers
+- Compressão mais eficiente
+- UI refinada
+

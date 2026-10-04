@@ -1,48 +1,44 @@
-# Tavin
+const WebSocket = require('ws');
 
-Aplicativo para compartilhar a tela de um celular para outro usando o mesmo Wi‑Fi. O app é instalado nos dois celulares e um deles entra em modo `sender` e o outro em modo `receiver`.
+const server = new WebSocket.Server({ port: 8080 });
+const clients = new Map();
 
-## Visão geral
+server.on('connection', (socket) => {
+  socket.on('message', (raw) => {
+    try {
+      const message = JSON.parse(raw.toString());
+      const type = message.type || 'message';
 
-- `sender`: captura a tela e envia frames para o servidor
-- `server`: recebe frames do emissor e repassa para o receptor
-- `receiver`: recebe os frames e mostra na tela do dispositivo
+      if (type === 'register') {
+        const role = message.role || 'unknown';
+        clients.set(socket, { role, id: message.id || String(Date.now()) });
+        console.log(`Cliente registrado como ${role}`);
+        return;
+      }
 
-## Como funciona
+      if (type === 'frame') {
+        const sender = [...clients.entries()].find(([, data]) => data.role === 'sender')?.[0];
+        const receiver = [...clients.entries()].find(([, data]) => data.role === 'receiver')?.[0];
 
-1. Instale o APK em ambos os celulares.
-2. No celular 1 escolha `sender`.
-3. No celular 2 escolha `receiver`.
-4. Informe o endereço do servidor, por exemplo: `192.168.0.10:8080`.
-5. Inicie a conexão e dê permissão de gravação da tela.
+        if (socket === sender && receiver) {
+          receiver.send(JSON.stringify({ type: 'frame', data: message.data }));
+        }
+        return;
+      }
 
-## Requisitos
+      if (type === 'ping') {
+        socket.send(JSON.stringify({ type: 'pong' }));
+      }
+    } catch (error) {
+      console.error('Erro ao processar mensagem:', error.message);
+    }
+  });
 
-- Android Studio + SDK 34
-- Node.js 18+
-- Conexão na mesma rede Wi‑Fi (idealmente)
+  socket.on('close', () => {
+    clients.delete(socket);
+    console.log('Cliente desconectado');
+  });
+});
 
-## Estrutura do repositório
+console.log('Servidor Tavin em execução na porta 8080');
 
-- `android/` — projeto Android em Kotlin
-- `server/` — servidor WebSocket em Node.js
-
-## Rodar o servidor
-
-```bash
-cd server
-npm install
-node server.js
-```
-
-O servidor escuta em:
-
-- `ws://<IP-DO-COMPUTADOR>:8080`
-
-## Build do APK
-
-Abra a pasta `android/TavinApp` no Android Studio e gere o APK, ou use Gradle.
-
-## Observação
-
-Este projeto é para uso legítimo com consentimento explícito dos dois aparelhos e em ambiente local. Não use para monitoramento não autorizado.
