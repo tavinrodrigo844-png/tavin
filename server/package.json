@@ -1,0 +1,12 @@
+{
+  "name": "tavin-server",
+  "version": "1.0.0",
+  "description": "Servidor de sinalização para streaming de tela do app Tavin",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
